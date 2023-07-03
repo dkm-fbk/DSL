@@ -10,7 +10,6 @@ def train(model, optimizer, loss, train_loader, test_loader, nn, mnist_test_data
         y = y.to(device)
         l = l.to(device)
 
-        #_, labels = torch.max(torch.squeeze(l), 1)
         optimizer.zero_grad()
 
         truth_values, prediction = model(x, y)

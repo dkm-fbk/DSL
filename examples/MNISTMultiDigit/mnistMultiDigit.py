@@ -12,44 +12,7 @@ import optuna
 import pickle
 import argparse
 import dataset_generation_eval
-#-e -c ./experiments/ckpt_mnistAdditionMultiDigit/ckpt_final.pth
 
-
-'''
-RES 2
-Experiment is over. After 10 runs on test set we obtained: 
- Mean: 0.9505000114440918
- Std: 0.007158905267715454
-Experiment is over. After 10 runs on test set (on single digits sum) we obtained: 
- Mean: 0.9799000024795532
- Std: 0.0018622044008225203
-
-RES 4 
-Experiment is over. After 10 runs on test set we obtained: 
- Mean: 0.8892000317573547
- Std: 0.0056533110328018665
-Experiment is over. After 10 runs on test set (on single digits sum) we obtained: 
- Mean: 0.973039984703064
- Std: 0.0012955243000760674
-
-RES 15 digits 
-Experiment is over. After 10 runs on test set we obtained: 
- Mean: 0.6411411166191101
- Std: 0.015149563550949097
-Experiment is over. After 10 runs on test set (on single digits sum) we obtained: 
- Mean: 0.9675300717353821
- Std: 0.001492075389251113
- 
- 
- 
- RES 1000
- Experiment is over. After 10 runs on test set we obtained: 
- Mean: 0.0
- Std: 0.0
-Experiment is over. After 10 runs on test set (on single digits sum) we obtained: 
- Mean: 0.9652547836303711
- Std: 0.001461292733438313
-'''
 
 def eval_N_digits(args, N):
 
@@ -113,8 +76,6 @@ def experiment_eval(args):
     DEVICE = 'cuda:0'
     BATCH_SIZE = 128
     BATCH_SIZE_VAL = 1000
-    TSNE = False
-    TSNE_EPOCH = 1000
     CKPT_SAVE = 50
     EPOCHS = 400
 
@@ -141,8 +102,7 @@ def experiment_eval(args):
     for e in tqdm(range(EPOCHS)):
         accuracy = train(model, optimizer, loss, train_loader_complex, test_loader_complex, nn,
                          mnist_test_data, e, run=0, device=DEVICE)
-        # if s.tsne > 0 and e % s.tsne == 0:
-        #    visualize_tsne(mnist_test_data_tsne, nn, e, 0, num_exp, writer)
+
         if CKPT_SAVE > 0 and e > 0 and e % CKPT_SAVE == 0:
             if not os.path.exists('./experiments/'):
                 os.mkdir('./experiments/')
@@ -150,15 +110,7 @@ def experiment_eval(args):
                 os.mkdir('./experiments/ckpt_{}'.format(EXPERIMENT))
             torch.save(model.state_dict(),
                        './experiments/ckpt_{}/ckpt.{}.pth'.format(EXPERIMENT, e))
-        if accuracy > 0.999:
-            print('accuracy > 0.99')
-            if not os.path.exists('./experiments/'):
-                os.mkdir('./experiments/')
-            if not os.path.exists('./experiments/ckpt_{}'.format(EXPERIMENT)):
-                os.mkdir('./experiments/ckpt_{}'.format(EXPERIMENT))
-            torch.save(model.state_dict(),
-                       './experiments/ckpt_{}/ckpt_final.pth'.format(EXPERIMENT, e))
-            break
+
     accuracy_test_results = []
     for e in range(10):
         accuracy_test = test_sum_multi(model, test_loader_complex, device=DEVICE)
@@ -184,8 +136,6 @@ def experiment(trial=None, args=None):
     DEVICE = 'cuda:0'
     BATCH_SIZE = 128
     BATCH_SIZE_VAL = 1000
-    TSNE = False
-    TSNE_EPOCH = 1000
     CKPT_SAVE = 50
     EPOCHS = 300
     EPSILON_SYMBOLS = trial.suggest_float('EPSILON_SYMBOLS', 0.0, 0.8)
@@ -209,9 +159,6 @@ def experiment(trial=None, args=None):
     for e in tqdm(range(EPOCHS)):
         accuracy = train(model, optimizer, loss, train_loader_simple, test_loader_simple, nn,
                          mnist_test_data, e, run=0, device=DEVICE)
-        if accuracy > 0.97:
-            print('accuracy > 0.97')
-            break
 
     print('End of simple problem. Going more complex (Sum 2 digits + padding)')
     for e in tqdm(range(EPOCHS)):
@@ -229,15 +176,6 @@ def experiment(trial=None, args=None):
                 os.mkdir('./experiments/ckpt_{}'.format(EXPERIMENT))
             torch.save(model.state_dict(),
                        './experiments/ckpt_{}/ckpt.{}.pth'.format(EXPERIMENT, e))
-        if accuracy > 0.98:
-            print('accuracy > 0.98')
-            if not os.path.exists('./experiments/'):
-                os.mkdir('./experiments/')
-            if not os.path.exists('./experiments/ckpt_{}'.format(EXPERIMENT)):
-                os.mkdir('./experiments/ckpt_{}'.format(EXPERIMENT))
-            torch.save(model.state_dict(),
-                       './experiments/ckpt_{}/ckpt_final.pth'.format(EXPERIMENT, e))
-            break
 
     accuracy_train = test_sum_multi(model, train_loader_complex, device=DEVICE)
     print('Accuracy train: {}'.format(accuracy_train))

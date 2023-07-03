@@ -41,40 +41,6 @@ def next_example(dataset, i, num_digits, zeros_images, padding=True):
     return torch.concat(x), torch.concat(y), torch.Tensor(label)
 
 
-
-#
-# def next_example(dataset, i, num_digits, done, zeros, num_zeros):
-#     number_x = ''
-#     number_y = ''
-#
-#     x = []
-#     number_x = '0'*num_zeros
-#     for _ in range(num_zeros):
-#         x.append(random.choice(zeros))
-#     for _ in range(num_digits):
-#         x1 = next(i)
-#         (x1, c1) = dataset[x1]
-#         x.append(x1)
-#         number_x += str(c1)
-#     y = []
-#     number_y = '0'*num_zeros
-#     for _ in range(num_zeros):
-#         y.append(random.choice(zeros))
-#     for _ in range(num_digits):
-#         y1 = next(i)
-#         (y1, c2) = dataset[y1]
-#         y.append(y1)
-#         number_y += str(c2)
-#     label = int(number_x) + int(number_y)
-#     label = list(str(label))
-#     label = [int(s) for s in label]
-#     while len(label) <= num_zeros + 1:
-#         label = [0]+label
-#     label = torch.Tensor(label[1:])  # TODO: rimuovere [1:] e + 1 da riga 37
-#
-#     return torch.concat(x), torch.concat(y), label
-
-
 def gather_examples(dataset, num_digits, padding=True, mode=0):
     examples = list()
     done = []
@@ -139,8 +105,6 @@ def get_dataset(batch_size, batch_size_val, eval=False):
 
     train_data_complex = gather_examples(mnist_train_data, 2, True, 1)
     test_data_complex = gather_examples(mnist_test_data, 2, True, 1)
-
-    # mnist_test_data_tsne = dataloader(mnist_test_data, s.batch_size_val)
 
     train_loader_simple = dataloader(MNISTDataset(train_data_simple), batch_size)
     test_loader_simple = dataloader(MNISTDataset(test_data_simple), batch_size_val)

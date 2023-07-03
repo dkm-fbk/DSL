@@ -13,25 +13,6 @@ import pickle
 
 import argparse
 
-#[I 2023-01-18 01:15:21,831] Trial 20 finished with value: 0.9921875 and parameters: {'EPSILON_SYMBOLS': 0.10836478372618243, 'EPSILON_RULES': 0.6332228380367143, 'LR': 0.13074863877410006}. Best is trial 6 with value: 1.0.
-'''
-RESULTS FOR N=4
-Epoch time:  0.06380987167358398
-[[0.8032283  0.19677174]]
-tensor([[1, 0],
-        [0, 1]], device='cuda:0')
-tensor([[0.6071, 0.6158],
-        [0.8039, 0.6486]], device='cuda:0', grad_fn=<SqueezeBackward0>)
-Confusion matrix
-Accuracy training: 0.9921875
-Experiment is over. After 1 runs on training set we obtained: 
- Mean: 0.9940000772476196
- Std: 5.960464477539063e-08
-
-Process finished with exit code 0
-
-
-'''
 
 def experiment_eval(args):
     torch.manual_seed(0)
@@ -41,8 +22,6 @@ def experiment_eval(args):
     DEVICE = 'cpu'
     BATCH_SIZE = 128
     BATCH_SIZE_VAL = 1000
-    TSNE = False
-    TSNE_EPOCH = 1000
     CKPT_SAVE = 50
     EPOCHS = 500
     EPSILON_SYMBOLS = args.eps_sym
@@ -75,14 +54,7 @@ def experiment_eval(args):
                 os.mkdir('./experiments/ckpt_{}'.format(EXPERIMENT))
             torch.save(model.state_dict(),
                        './experiments/ckpt_{}/ckpt.{}.pth'.format(EXPERIMENT, e))
-        if accuracy > 0.98:
-            if not os.path.exists('./experiments/'):
-                os.mkdir('./experiments/')
-            if not os.path.exists('./experiments/ckpt_{}'.format(EXPERIMENT)):
-                os.mkdir('./experiments/ckpt_{}'.format(EXPERIMENT))
-            torch.save(model.state_dict(),
-                       './experiments/ckpt_{}/ckpt_final.pth'.format(EXPERIMENT, e))
-            break
+
     accuracy_test_results = []
     for e in range(10):
         accuracy_test = test_visual_parity(model, test_loader, device=DEVICE)
@@ -108,8 +80,6 @@ def experiment(trial):
     DEVICE = 'cuda:0'
     BATCH_SIZE = 128
     BATCH_SIZE_VAL = 1000
-    TSNE = False
-    TSNE_EPOCH = 1000
     CKPT_SAVE = 50
     EPOCHS = 500
     EPSILON_SYMBOLS = trial.suggest_float('EPSILON_SYMBOLS', 0.0, 0.8)
@@ -142,14 +112,6 @@ def experiment(trial):
                 os.mkdir('./experiments/ckpt_{}'.format(EXPERIMENT))
             torch.save(model.state_dict(),
                        './experiments/ckpt_{}/ckpt.{}.pth'.format(EXPERIMENT, e))
-        if accuracy > 0.968:
-            if not os.path.exists('./experiments/'):
-                os.mkdir('./experiments/')
-            if not os.path.exists('./experiments/ckpt_{}'.format(EXPERIMENT)):
-                os.mkdir('./experiments/ckpt_{}'.format(EXPERIMENT))
-            torch.save(model.state_dict(),
-                       './experiments/ckpt_{}/ckpt_final.pth'.format(EXPERIMENT, e))
-            break
 
     accuracy_train = test_visual_parity(model, train_loader, device=DEVICE)
     accuracy_train_results.append(accuracy_train.cpu().numpy())

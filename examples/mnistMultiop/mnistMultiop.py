@@ -11,7 +11,6 @@ import numpy as np
 import optuna
 import pickle
 import argparse
-#[I 2023-01-18 16:07:13,860] Trial 22 finished with value: 0.296875 and parameters: {'EPSILON_SYMBOLS': 0.23699542018849643, 'EPSILON_LETTERS': 0.647002418144579, 'EPSILON_RULES': 0.2634794214513527, 'LR': 0.14814748838947028}. Best is trial 22 with value: 0.296875.
 
 def experiment_eval(args):
     torch.manual_seed(0)
@@ -22,8 +21,6 @@ def experiment_eval(args):
     DEVICE = 'cuda:0'
     BATCH_SIZE = 128
     BATCH_SIZE_VAL = 1000
-    TSNE = False
-    TSNE_EPOCH = 1000
     CKPT_SAVE = 250
     EPOCHS = 20000
     EPSILON_SYMBOLS = args.eps_sym
@@ -58,14 +55,7 @@ def experiment_eval(args):
                 os.mkdir('./experiments/ckpt_{}'.format(EXPERIMENT))
             torch.save(model.state_dict(),
                        './experiments/ckpt_{}/ckpt.{}.pth'.format(EXPERIMENT, e))
-        if accuracy > 0.975:
-            if not os.path.exists('./experiments/'):
-                os.mkdir('./experiments/')
-            if not os.path.exists('./experiments/ckpt_{}'.format(EXPERIMENT)):
-                os.mkdir('./experiments/ckpt_{}'.format(EXPERIMENT))
-            torch.save(model.state_dict(),
-                       './experiments/ckpt_{}/ckpt_final.pth'.format(EXPERIMENT, e))
-            break
+
     accuracy_test = []
     for e in range(10):
         accuracy = test_multiop(model, test_loader, device=DEVICE)
@@ -89,8 +79,6 @@ def experiment(trial=None):
     DEVICE = 'cuda:0'
     BATCH_SIZE = 128
     BATCH_SIZE_VAL = 1000
-    TSNE = False
-    TSNE_EPOCH = 1000
     CKPT_SAVE = 50
     EPOCHS = 300
     EPSILON_SYMBOLS = trial.suggest_float('EPSILON_SYMBOLS', 0.0, 0.8)
@@ -126,14 +114,7 @@ def experiment(trial=None):
                 os.mkdir('./experiments/ckpt_{}'.format(EXPERIMENT))
             torch.save(model.state_dict(),
                        './experiments/ckpt_{}/ckpt.{}.pth'.format(EXPERIMENT, e))
-        if accuracy > 0.97:
-            if not os.path.exists('./experiments/'):
-                os.mkdir('./experiments/')
-            if not os.path.exists('./experiments/ckpt_{}'.format(EXPERIMENT)):
-                os.mkdir('./experiments/ckpt_{}'.format(EXPERIMENT))
-            torch.save(model.state_dict(),
-                       './experiments/ckpt_{}/ckpt_final.pth'.format(EXPERIMENT, e))
-            break
+
         trial.report(accuracy, e)
 
         # Handle pruning based on the intermediate value.

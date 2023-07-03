@@ -32,8 +32,6 @@ def train(model, optimizer, loss, train_loader, test_loader, nn, nn_letters, mni
     if (e % verbose_conf == 0 and e > 0):
         confusion = test_MNIST(nn, mnist_test_data, e, 0, run, 10, device=device)
         confusion_letters = test_EMNIST(nn_letters, emnist_test_data, e, 1, run, 4, device=device)
-        #for idx in range(4):
-        #    accuracy_rules(model.weights[:, :, idx, :], p1)
 
         if nn2 is not None:
             confusion2 = test_MNIST(nn2, mnist_test_data, e, 1, run, device=device)

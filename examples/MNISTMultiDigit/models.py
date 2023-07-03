@@ -55,9 +55,6 @@ class MNISTMultiDigit(torch.nn.Module):
         else:
             self.nn2 = nn
 
-        # self.weights_carry = torch.nn.Parameter(torch.randn([10, 10, 2, 2]).to(s.device))  TODO
-        # self.weights_carry.requires_grad = True
-        # self.weights_sum = torch.nn.Parameter(torch.randn([10, 10, 2, 10]).to(s.device))
         self.weights_carry = torch.nn.Parameter(torch.randn([n_digits, n_digits, 2, 2]).to(self.device))
         self.weights_carry.requires_grad = True
         self.weights_sum = torch.nn.Parameter(torch.randn([n_digits, n_digits, 2, 10]).to(self.device))
@@ -145,10 +142,6 @@ class MNISTMultiDigit(torch.nn.Module):
             ]
 
             # Result (and corresponding truth value) of the prediction of current position
-            #res_symbols.append(g_matrix_sum[chosen_symbols_x, chosen_symbols_y, previous_carry])
-            #res_truths.append(torch.min(torch.concat( truths_list +
-            #                                         [rules_weights_sum[chosen_symbols_x, chosen_symbols_y,
-            #                                                            previous_carry].view(-1, 1)], dim=1), 1))
             res_symbols[:, i] = g_matrix_sum[chosen_symbols_x, chosen_symbols_y, previous_carry]
             res_truths[:, i] = torch.min(torch.concat( truths_list +
                                                      [rules_weights_sum[chosen_symbols_x, chosen_symbols_y,

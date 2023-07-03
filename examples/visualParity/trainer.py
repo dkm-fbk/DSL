@@ -1,5 +1,4 @@
 import time
-import torch
 from utils import *
 
 def train(model, optimizer, loss, train_loader, test_loader, nn, mnist_test_data, e, run=0, device='cpu',
@@ -14,7 +13,6 @@ def train(model, optimizer, loss, train_loader, test_loader, nn, mnist_test_data
         truth_values, prediction = model(tX)
         model_labels = torch.where(torch.eq(tY.view(-1, 1), prediction.view(-1, 1)), 1.0, 0.0)
 
-        # print(train_Y.shape)
         s_loss = loss(torch.logit(truth_values.view(-1, 1), 0.0001), model_labels)
 
         s_loss.backward()

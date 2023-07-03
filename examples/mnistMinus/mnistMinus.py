@@ -16,19 +16,11 @@ def experiment_eval(args):
     torch.manual_seed(0)
     random.seed(0)
     np.random.seed(0)
-    # torch.cuda.manual_seed(0)
-    # torch.backends.cudnn.deterministc = True
-    # torch.backends.cudnn.benchmark = False
-    # os.environ['PYTHONHASHSEED'] = '0'
-    # os.environ['CUBLAS_WORKSPACE_CONFIG'] =':4096:8'
-    # torch.use_deterministic_algorithms(True)
     EXPERIMENT = 'mnistMinus'
     NUM_EXPERIMENT = 5
     DEVICE = 'cpu'  # TODO GPU is much faster, but scatter_add_cuda_kernel wasn't implemented in a deterministic way. Thus on GPU exp is not exactly reproducible (issue here: https://discuss.pytorch.org/t/runtimeerror-scatter-add-cuda-kernel-does-not-have-a-deterministic-implementation/132290)
     BATCH_SIZE = 128
     BATCH_SIZE_VAL = 1000
-    TSNE = False
-    TSNE_EPOCH = 1000
     CKPT_SAVE = 50
     EPOCHS = 100
 
@@ -67,8 +59,6 @@ def experiment_eval(args):
             accuracy = train(model, optimizer, loss, train_loader, test_loader, nn, mnist_test_data, e,
                                  run=num_exp, device=DEVICE)
 
-            if TSNE and e % TSNE_EPOCHS == 0 and e > 0:
-                visualize_tsne(mnist_test_data_tsne, nn, e, 0, num_exp)
             if CKPT_SAVE > 0 and e > 0 and e % CKPT_SAVE == 0:
                 if not os.path.exists('./experiments/'):
                     os.mkdir('./experiments/')
@@ -76,14 +66,6 @@ def experiment_eval(args):
                     os.mkdir('./experiments/ckpt_{}'.format(EXPERIMENT))
                 torch.save(model.state_dict(),
                            './experiments/ckpt_{}/ckpt.{}.pth'.format(EXPERIMENT, e))
-            if accuracy > 0.98:
-                if not os.path.exists('./experiments/'):
-                    os.mkdir('./experiments/')
-                if not os.path.exists('./experiments/ckpt_{}'.format(EXPERIMENT)):
-                    os.mkdir('./experiments/ckpt_{}'.format(EXPERIMENT))
-                torch.save(model.state_dict(),
-                           './experiments/ckpt_{}/ckpt_final.pth'.format(EXPERIMENT, e))
-                break
 
         accuracy_test = test_sum(model, test_loader, device=DEVICE)
         accuracy_test_results.append(accuracy_test.cpu().numpy())
@@ -101,8 +83,6 @@ def experiment_optuna(trial, args):
     DEVICE = 'cuda:0'
     BATCH_SIZE = 128
     BATCH_SIZE_VAL = 1000
-    TSNE = False
-    TSNE_EPOCH = 1000
     CKPT_SAVE = 50
     EPOCHS = 50
     EPSILON_SYMBOLS = trial.suggest_float('EPSILON_SYMBOLS', 0.0, 0.8)
@@ -144,8 +124,6 @@ def experiment_optuna(trial, args):
             accuracy = train(model, optimizer, loss, train_loader, test_loader, nn, mnist_test_data, e,
                                  run=num_exp, device=DEVICE)
 
-            if TSNE and e % TSNE_EPOCHS == 0 and e > 0:
-                visualize_tsne(mnist_test_data_tsne, nn, e, 0, num_exp)
             if CKPT_SAVE > 0 and e > 0 and e % CKPT_SAVE == 0:
                 if not os.path.exists('./experiments/'):
                     os.mkdir('./experiments/')
@@ -153,14 +131,6 @@ def experiment_optuna(trial, args):
                     os.mkdir('./experiments/ckpt_{}'.format(EXPERIMENT))
                 torch.save(model.state_dict(),
                            './experiments/ckpt_{}/ckpt.{}.pth'.format(EXPERIMENT, e))
-            if accuracy > 0.968:
-                if not os.path.exists('./experiments/'):
-                    os.mkdir('./experiments/')
-                if not os.path.exists('./experiments/ckpt_{}'.format(EXPERIMENT)):
-                    os.mkdir('./experiments/ckpt_{}'.format(EXPERIMENT))
-                torch.save(model.state_dict(),
-                           './experiments/ckpt_{}/ckpt_final.pth'.format(EXPERIMENT, e))
-                break
 
         accuracy_train = test_sum(model, train_loader, device=DEVICE)
         accuracy_train_results.append(accuracy_train.cpu().numpy())

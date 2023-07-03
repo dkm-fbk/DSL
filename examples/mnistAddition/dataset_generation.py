@@ -3,8 +3,6 @@ import torch
 import torchvision.transforms as transforms
 import random
 from torch.utils.data import Dataset, DataLoader
-import numpy as np
-import os
 
 
 
@@ -45,10 +43,7 @@ class MNISTDataset(Dataset):
     def __getitem__(self, idx):
         return self.dataset[idx]
 
-#def seed_worker(worker_id):
-#    worker_seed = torch.initial_seed() % 2**32
-#    numpy.random.seed(worker_seed)
-#    random.seed(worker_seed)
+
 
 def dataloader(dataset, batch_size=32):
     return DataLoader(

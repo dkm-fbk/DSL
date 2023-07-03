@@ -12,42 +12,6 @@ import optuna
 import pickle
 import argparse
 
-#[I 2023-01-17 14:03:22,322] Trial 0 finished with value: 1.0 and parameters: {'EPSILON_SYMBOLS': 0.2807344052335263, 'EPSILON_RULES': 0.1077119516324264, 'LR': 0.11639833786002995}. Best is trial 0 with value: 1.0.
-'''
-[5923, 6742, 5958, 6131, 5842, 5421, 5918, 6265, 5851, 5949]
-[980, 1135, 1032, 1010, 982, 892, 958, 1028, 974, 1009]
-Starting training number  0
-Accuracy in sum task (before training):tensor(0.0312)
- 21%|██        | 21/100 [01:52<06:13,  4.73s/it]End of epoch 20
-Epoch time:  4.446096420288086
-Accuracy in sum task. Train: 0.8203125
- 35%|███▌      | 35/100 [02:58<05:30,  5.09s/it]
-accuracy > 0.97
-Starting training number  1
-Accuracy in sum task (before training):tensor(0.0469)
- 19%|█▉        | 19/100 [01:27<06:14,  4.62s/it]
-accuracy > 0.97
-Starting training number  2
-  0%|          | 0/100 [00:00<?, ?it/s]Accuracy in sum task (before training):tensor(0.1016)
- 21%|██        | 21/100 [01:32<05:44,  4.37s/it]End of epoch 20
-Epoch time:  4.356878757476807
-Accuracy in sum task. Train: 0.921875
-accuracy > 0.97
- 21%|██        | 21/100 [01:36<06:02,  4.59s/it]
-Starting training number  3
-  0%|          | 0/100 [00:00<?, ?it/s]Accuracy in sum task (before training):tensor(0.0234)
- 17%|█▋        | 17/100 [01:22<06:41,  4.83s/it]
-accuracy > 0.97
-Starting training number  4
-  0%|          | 0/100 [00:00<?, ?it/s]Accuracy in sum task (before training):tensor(0.0547)
- 18%|█▊        | 18/100 [01:22<06:18,  4.61s/it]
-accuracy > 0.97
-Experiment is over. After 5 runs on test set we obtained: 
- Mean: 0.9724000096321106
- Std: 0.005388872232288122
-
-Process finished with exit code 0
-'''
 
 def visual_addition(args):
 
@@ -87,19 +51,11 @@ def experiment_eval(args=None):
     torch.manual_seed(0)
     random.seed(0)
     np.random.seed(0)
-    #torch.cuda.manual_seed(0)
-    #torch.backends.cudnn.deterministc = True
-    #torch.backends.cudnn.benchmark = False
-    #os.environ['PYTHONHASHSEED'] = '0'
-    #os.environ['CUBLAS_WORKSPACE_CONFIG'] =':4096:8'
-    #torch.use_deterministic_algorithms(True)
     EXPERIMENT = 'mnistAddition'
     NUM_EXPERIMENT = 5
     DEVICE = 'cpu' #TODO GPU is much faster, but scatter_add_cuda_kernel wasn't implemented in a deterministic way. Thus on GPU exp is not exactly reproducible (issue here: https://discuss.pytorch.org/t/runtimeerror-scatter-add-cuda-kernel-does-not-have-a-deterministic-implementation/132290)
     BATCH_SIZE = 128
     BATCH_SIZE_VAL = 1000
-    TSNE = False
-    TSNE_EPOCH = 1000
     CKPT_SAVE = 50
     EPOCHS = 100
 
@@ -129,8 +85,6 @@ def experiment_eval(args=None):
             accuracy = train(model, optimizer, loss, train_loader, test_loader, nn, mnist_test_data, e,
                                  run=num_exp, device=DEVICE)
 
-            if TSNE and e % TSNE_EPOCHS == 0 and e > 0:
-                visualize_tsne(mnist_test_data_tsne, nn, e, 0, num_exp)
             if CKPT_SAVE > 0 and e > 0 and e % CKPT_SAVE == 0:
                 if not os.path.exists('./experiments/'):
                     os.mkdir('./experiments/')
@@ -138,15 +92,6 @@ def experiment_eval(args=None):
                     os.mkdir('./experiments/ckpt_{}'.format(EXPERIMENT))
                 torch.save(model.state_dict(),
                            './experiments/ckpt_{}/ckpt.{}.pth'.format(EXPERIMENT, e))
-            if accuracy > 0.98:
-                print('accuracy > 0.97')
-                if not os.path.exists('./experiments/'):
-                    os.mkdir('./experiments/')
-                if not os.path.exists('./experiments/ckpt_{}'.format(EXPERIMENT)):
-                    os.mkdir('./experiments/ckpt_{}'.format(EXPERIMENT))
-                torch.save(model.state_dict(),
-                           './experiments/ckpt_{}/ckpt_final.pth'.format(EXPERIMENT, e))
-                break
 
         accuracy_test = test_sum(model, test_loader, device=DEVICE)
         accuracy_test_results.append(accuracy_test.cpu().numpy())
@@ -168,8 +113,6 @@ def experiment_optuna(trial=None):
     DEVICE = 'cuda:0'
     BATCH_SIZE = 128
     BATCH_SIZE_VAL = 1000
-    TSNE = False
-    TSNE_EPOCH = 1000
     CKPT_SAVE = 50
     EPOCHS = 200
     EPSILON_SYMBOLS = trial.suggest_float('EPSILON_SYMBOLS', 0.0, 0.8)
@@ -199,8 +142,6 @@ def experiment_optuna(trial=None):
         accuracy = train(model, optimizer, loss, train_loader, test_loader, nn, mnist_test_data, e,
                              run=0, device=DEVICE)
 
-        if TSNE and e % TSNE_EPOCHS == 0 and e > 0:
-            visualize_tsne(mnist_test_data_tsne, nn, e, 0, num_exp)
         if CKPT_SAVE > 0 and e > 0 and e % CKPT_SAVE == 0:
             if not os.path.exists('./experiments/'):
                 os.mkdir('./experiments/')
@@ -208,15 +149,6 @@ def experiment_optuna(trial=None):
                 os.mkdir('./experiments/ckpt_{}'.format(EXPERIMENT))
             torch.save(model.state_dict(),
                        './experiments/ckpt_{}/ckpt.{}.pth'.format(EXPERIMENT, e))
-        if accuracy > 0.98:
-            print('accuracy > 0.97')
-            if not os.path.exists('./experiments/'):
-                os.mkdir('./experiments/')
-            if not os.path.exists('./experiments/ckpt_{}'.format(EXPERIMENT)):
-                os.mkdir('./experiments/ckpt_{}'.format(EXPERIMENT))
-            torch.save(model.state_dict(),
-                       './experiments/ckpt_{}/ckpt_final.pth'.format(EXPERIMENT, e))
-            break
         trial.report(accuracy, e)
 
         # Handle pruning based on the intermediate value.

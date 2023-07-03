@@ -3,7 +3,7 @@ import torch
 from utils import *
 
 def train(model, optimizer, loss, train_loader, test_loader, nn, mnist_test_data, e, run=0, device='cpu',
-          verbose=10, tensorboard=False, verbose_conf=25):
+          verbose=10, verbose_conf=25):
     epoch_start = time.time()
     for i, (x, y, l) in enumerate(train_loader):
 
